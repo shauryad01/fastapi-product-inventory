@@ -37,3 +37,11 @@ def update_product(id:int,product:Product):
             pr = product
             return "Product Added"
     return "Product Not Found"
+
+@app.delete("/product")
+def delete_product(id:int, product:Product):
+    for pr in products:
+        if pr.id == id:
+            products.remove(pr)
+            return "Product Removed"
+    return "Product Not Found"
