@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database.connection import session
-from database import models
+from database import product_model
 from schemas.product_schema import ProductCreate, ProductResponse
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -17,12 +17,12 @@ def get_db():
 # GET all products
 @router.get("/", response_model=list[ProductResponse])
 def get_products(db: Session = Depends(get_db)):
-    return db.query(models.Product).all()
+    return db.query(product_model.Product).all()
 
 # GET single product
 @router.get("/{id}", response_model=ProductResponse)
 def get_product(id: int, db: Session = Depends(get_db)):
-    product = db.query(models.Product).filter(models.Product.id == id).first()
+    product = db.query(product_model.Product).filter(product_model.Product.id == id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
@@ -30,7 +30,7 @@ def get_product(id: int, db: Session = Depends(get_db)):
 # CREATE product
 @router.post("/", response_model=ProductResponse)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
-    db_product = models.Product(**product.model_dump())
+    db_product = product_model.Product(**product.model_dump())
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
@@ -39,7 +39,7 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
 # UPDATE product
 @router.put("/{id}")
 def update_product(id: int, product: ProductCreate, db: Session = Depends(get_db)):
-    db_product = db.query(models.Product).filter(models.Product.id == id).first()
+    db_product = db.query(product_model.Product).filter(product_model.Product.id == id).first()
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
 
@@ -52,7 +52,7 @@ def update_product(id: int, product: ProductCreate, db: Session = Depends(get_db
 # DELETE product
 @router.delete("/{id}")
 def delete_product(id: int, db: Session = Depends(get_db)):
-    db_product = db.query(models.Product).filter(models.Product.id == id).first()
+    db_product = db.query(product_model.Product).filter(product_model.Product.id == id).first()
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
 
