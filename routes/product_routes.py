@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from database.connection import session
 from database import product_model
 from schemas.product_schema import ProductCreate, ProductResponse
+import config
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
@@ -30,11 +31,11 @@ def get_product(id: int, db: Session = Depends(get_db)):
 # CREATE product
 @router.post("/", response_model=ProductResponse)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
-    db_product = product_model.Product(**product.model_dump())
-    db.add(db_product)
+    new_product = product_model.Product(**product.dict(), added_by = config.current_u_id)
+    db.add(new_product)
     db.commit()
-    db.refresh(db_product)
-    return db_product
+    db.refresh(new_product)
+    return new_product
 
 # UPDATE product
 @router.put("/{id}")

@@ -5,6 +5,7 @@ from schemas.user_schema import UserCreate, UserLogin
 from sqlalchemy.orm import Session
 from utils.auth import hash_password, verify_password, create_access_token
 from datetime import datetime
+import config
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -34,7 +35,6 @@ def signup(user:UserCreate, db:Session=Depends(get_db)):
 
     db.add(newUser)
     db.commit()
-    print(hash_password(user.password))
     return{"message":"User created"}
 
 
@@ -44,11 +44,14 @@ def login(user:UserLogin, db:Session=Depends(get_db)):
     if not in_db:
         raise HTTPException(status_code=400, detail = "Invalid Email ID")
     
-    if not verify_password(user.password,in_db.password):
+    if not verify_password(user.password, in_db.password):
         raise HTTPException(status_code=400, detail = "Invalid Password")
         
     # token = create_access_token({"sub":existing.email})
     token = create_access_token()
     in_db.last_login = datetime.now()
+    config.current_u_id = in_db.id
     db.commit()
+    print(config.current_u_id)
     return {"access_token": token, "token_type": "bearer"}
+

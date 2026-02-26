@@ -7,6 +7,7 @@ from database import product_model, user_model
 app = FastAPI(title="Product API")
 router = APIRouter()
 
+user_model.Base.metadata.create_all(bind=engine)
 product_model.Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
